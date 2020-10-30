@@ -1,0 +1,33 @@
+# задание 6
+import random
+numbers = [random.randint(0,100) for _ in range (10)]
+print (numbers)
+print ("minimum =", min (numbers), "maximum =", max (numbers))
+
+#задание 7
+#numbers = [random.randint(0,100) for _ in range (10)] 
+numbers = [3, 0, 7, 0, 0, 3]
+primes = []
+for elem in numbers:
+     if elem != 0:
+        primes.append(elem)
+for prime in primes:
+    print(prime)
+    
+#задание 8
+numbers = [3, 0, 7, 0, 0, 3]
+a = 3
+primes = []
+for elem in numbers:
+     if elem != a:
+        primes.append(elem)
+for prime in primes:
+    print(prime)
+
+#задание 9
+numbers = [3, 0, 7, 0, 0, 3]; 
+A1 = 10; A2 = 9; A3 = 13;
+numbers.insert (1,A1)
+numbers.insert (2,A2)
+numbers.insert (3,A3)
+print (numbers)
