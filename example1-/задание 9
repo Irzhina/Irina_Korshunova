@@ -1,0 +1,6 @@
+numbers = [3, 0, 7, 0, 0, 3]; 
+A1 = 10; A2 = 9; A3 = 13;
+numbers.insert (1,A1)
+numbers.insert (2,A2)
+numbers.insert (3,A3)
+print (numbers)
