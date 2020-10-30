@@ -1,0 +1,7 @@
+numbers = [3, 0, 7, 0, 0, 3]
+primes = []
+for elem in numbers:
+     if elem != 0:
+        primes.append(elem)
+for prime in primes:
+    print(prime)
