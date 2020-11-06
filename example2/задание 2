@@ -1,0 +1,11 @@
+print("Enter a word: ")
+a = input()
+#print("a =", a)
+letters=list(a)
+result={}
+for l in letters:
+    if l not in result:
+        result[l]=1
+    else: 
+        result[l]+=1
+print (result)
