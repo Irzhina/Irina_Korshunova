@@ -1,0 +1,61 @@
+class Buyer:
+
+    default_name = 'No name'
+    default_age = 0
+    default_money = 0
+
+    def __init__(self, name=default_name, age=default_age, money=default_money):
+
+        self.name = name
+        self.age = age
+        self.money = money
+        
+
+
+    def info(self):
+        print(f'Осталось денег: {self.money}')
+    
+
+    def default_info():
+        print(f'Default Name: {Buyer.default_name}')
+        print(f'Default Age: {Buyer.default_age}')
+        print(f'Default Money: {Buyer.default_money}')
+
+
+    def buy_present(self, present, discount):
+        price = present.final_price(discount)
+        if self.money >= price:
+            self.make_deal(present, price)
+        else:
+            print('Недостаточно средств')
+
+  
+    def make_deal(self, present, price):
+        self.money -= price
+        self.present = present
+
+
+class Present:
+
+    def __init__(self, price):
+        self._price = price
+
+    def final_price(self, discount):
+        final_price = self._price * (100 - discount) / 100
+        print(f'Цена со скидкой: {final_price}')
+        return final_price
+    
+    name = input ("Введите ваше имя: ")
+    age = float(input ("Введите ваш возраст: "))
+    money = float(input ("Введите ваш бюджет: "))
+   
+    ira = Buyer(name, age, money)
+    
+    
+    pr= float(input("Введите цену подарка:"))
+    present= Present(pr)
+    discount= float( input ("Введите вашу скидку:"))
+   
+    ira.buy_present (present, discount)
+    ira.info()
+    
