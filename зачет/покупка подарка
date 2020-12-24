@@ -1,90 +1,97 @@
- class Buyer:
+ class StopExecution(Exception):
+    def __init__(self, code):
+        self.code = code
 
-        default_name = 'No name'
-        default_age = 0
-        default_money = 0
+    def _render_traceback_(self):
+        print("Exit %s" % self.code)
 
-        def __init__(self, name=default_name, age=default_age, money=default_money):
+    def exit(code):
+        raise StopExecution(code) 
+        
+class Buyer:
 
-            self.name = name
-            self.age = age
-            self.money = money
+    default_name = 'No name'
+    default_age = 0
+    default_money = 0
 
+    def __init__(self, name=default_name, age=default_age, money=default_money):
 
+        self.name = name
+        self.age = age
+        self.money = money
 
-        def info(self):
-            print(f'Осталось денег: {self.money}')
-
-
-        def default_info():
-            print(f'Default Name: {Buyer.default_name}')
-            print(f'Default Age: {Buyer.default_age}')
-            print(f'Default Money: {Buyer.default_money}')
-
-
-
-        def buy_present(self, present, discount):
-            price = present.final_price(discount)
-            if self.money >= price:
-                self.make_deal(present, price)
-            else:
-                print('Недостаточно средств')
+    def info(self):
+        print(f'Осталось денег: {self.money}')
 
 
-        def make_deal(self, present, price):
-            self.money -= price
-            self.present = present
+    def default_info():
+        print(f'Default Name: {Buyer.default_name}')
+        print(f'Default Age: {Buyer.default_age}')
+        print(f'Default Money: {Buyer.default_money}')
+
+    def buy_present(self, present, discount):
+        price = present.final_price(discount)
+        if self.money >= price:
+            self.make_deal(present, price)
+        else:
+            print('Недостаточно средств')
 
 
-    class Present:
-
-        def __init__(self, price):
-            self._price = price
-
-        def final_price(self, discount):
-            final_price = self._price * (100 - discount) / 100
-            print(f'Цена со скидкой: {final_price}')
-            return final_price
+    def make_deal(self, present, price):
+        self.money -= price
+        self.present = present
 
 
+class Present:
 
+    def __init__(self, price):
+        self._price = price
 
+    def final_price(self, discount):
+        final_price = self._price * (100 - discount) / 100
+        print(f'Цена со скидкой: {final_price}')
+        return final_price
 
-    
     
 name = input ("Введите ваше имя: ")
-age = float(input ("Введите ваш возраст: "))
-money = (input ("Введите ваш бюджет: "))
+age = input ("Введите ваш возраст: ")
+money = input ("Введите ваш бюджет: ")
+
 
 terms= money.split(".")
 
-    if not(0<len(terms)<=2):
-        print("Вы ввели не число. Попробуйте снова: ")
-        exit(1)
-    
-    if len(terms) == 1 and not terms[0].isdigit():
-        print("Вы ввели не число. Попробуйте снова: ") and exit(1)
-    else:
-        money1=float(money)
-        
-        
-    if len(terms) == 2 and (not terms[0].isdigit() or not terms[1].isdigit()):
-        print("Вы ввели не число. Попробуйте снова: ") and exit(1) 
-    else:
-         money1=float(money)
+if not(0<len(terms)<=2):
+    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
 
-   
-       
-ira = Buyer(name, age, money1)
-    
-    
-pr= float(input("Введите цену подарка:"))
+if len(terms) == 1 and not terms[0].isdigit() or len(terms) == 2 and (not terms[0].isdigit() or not terms[1].isdigit()):
+    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and  exit()
+else:
+    money= float(money)
+
+ira = Buyer(name, age, money)
+
+pr= input("Введите цену подарка:")
+
+terms1= pr.split(".")
+if not(0<len(terms1)<=2):
+    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
+
+if len(terms1) == 1 and not terms1[0].isdigit() or len(terms1) == 2 and (not terms1[0].isdigit() or not terms1[1].isdigit()):
+    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
+else:
+    pr=float(pr) 
 present =Present(pr)
-discount= float( input ("Введите вашу скидку:"))
-   
+discount=  input ("Введите вашу скидку:")
+
+terms3= discount.split(".")
+
+if not(0<len(terms3)<=2):
+    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
+
+if len(terms3) == 1 and not terms[0].isdigit() or len(terms3) == 2 and (not terms3[0].isdigit() or not terms3[1].isdigit()):
+    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
+else:
+    discount= float(discount)
+
 ira.buy_present (present, discount)
 ira.info()
-    
-
-
-    
