@@ -1,4 +1,4 @@
- class StopExecution(Exception):
+class StopExecution(Exception):
     def __init__(self, code):
         self.code = code
 
@@ -45,53 +45,46 @@ class Buyer:
 class Present:
 
     def __init__(self, price):
-        self._price = price
+        self.price = price
 
     def final_price(self, discount):
-        final_price = self._price * (100 - discount) / 100
+        final_price = self.price * (100-discount) / 100
         print(f'Цена со скидкой: {final_price}')
         return final_price
 
     
+
+def check_fl (arg1, arg2):
+    arg1= arg2.split(".")
+    if not(0<len(arg1)<=2):
+        print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
+
+    if len(arg1) == 1 and not arg1[0].isdigit() or len(arg1) == 2 and (not arg1[0].isdigit() or not arg1[1].isdigit()):
+        print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and  exit()
+      
+        
+        
 name = input ("Введите ваше имя: ")
 age = input ("Введите ваш возраст: ")
 money = input ("Введите ваш бюджет: ")
 
 
-terms= money.split(".")
-
-if not(0<len(terms)<=2):
-    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
-
-if len(terms) == 1 and not terms[0].isdigit() or len(terms) == 2 and (not terms[0].isdigit() or not terms[1].isdigit()):
-    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and  exit()
-else:
-    money= float(money)
+check_fl (terms, money)
+money=float(money)
 
 ira = Buyer(name, age, money)
 
 pr= input("Введите цену подарка:")
 
-terms1= pr.split(".")
-if not(0<len(terms1)<=2):
-    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
+check_fl (terms, pr)
+pr= float(pr)
 
-if len(terms1) == 1 and not terms1[0].isdigit() or len(terms1) == 2 and (not terms1[0].isdigit() or not terms1[1].isdigit()):
-    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
-else:
-    pr=float(pr) 
-present =Present(pr)
-discount=  input ("Введите вашу скидку:")
 
-terms3= discount.split(".")
+present = Present(pr)
+discount= input ("Введите вашу скидку:")
 
-if not(0<len(terms3)<=2):
-    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
+check_fl(terms, discount)
 
-if len(terms3) == 1 and not terms[0].isdigit() or len(terms3) == 2 and (not terms3[0].isdigit() or not terms3[1].isdigit()):
-    print("Вы ввели не число. ПЕРЕЗАПУСТИТЕ ПРОГРАММУ: ") and exit(1)
-else:
-    discount= float(discount)
-
-ira.buy_present (present, discount)
-ira.info()
+discount=float(discount)
+ira.buy_present (present,discount)
+ira.info() 
