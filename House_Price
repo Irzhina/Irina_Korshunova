@@ -1,0 +1,168 @@
+import numpy as np 
+import pandas as pd
+from math import sqrt
+from scipy.stats import skew
+import matplotlib.pyplot as plt
+from sklearn import linear_model
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+df = pd.read_csv("C:/Users/Ира/Downloads/house/train.csv")
+
+df.head()
+
+
+
+dt = pd.read_csv("C:/Users/Ира/Downloads/house/test.csv")
+
+
+dt.head()
+
+# shape and data types of the data
+print(df.shape)
+print(df.dtypes)
+
+print(dt.shape)
+print(dt.dtypes)
+
+missing = df.isnull().sum()
+print(missing)
+
+#  Процентный список пропущенных данных в train
+for col in df.columns:
+    pct_missing = np.mean(df[col].isnull())
+    print('{} - {}%'.format(col, round(pct_missing*100)))
+    print('{} - {}'.format(col, round(pct_missing*100)>20))
+columnstodrop=['Alley','FireplaceQu','PoolQC','Fence','LotFrontage' ,'MiscFeature' ,'OverallCond','MSSubClass', 'Utilities', 'Street' ,'RoofMatl','YrSold','Condition2', 'Heating']
+print(df_without_miss)
+
+#  Процентный список пропущенных данных в test плюс удаление колонок с большим кол-вом 0
+for col in dt.columns:
+    test_missing = np.mean(dt[col].isnull())
+    print('{} - {}%'.format(col, round(test_missing*100)))
+    print('{} - {}'.format(col, round(test_missing*100)>20))
+columnstodrop=['Alley','FireplaceQu','PoolQC','Fence','LotFrontage' ,'MiscFeature' ,'OverallCond','MSSubClass',  'Utilities', 'Street' ,'RoofMatl','YrSold','Condition2', 'Heating']
+dt_without_miss = dt.drop(columnstodrop, axis=1)
+print(dt_without_miss)
+
+# удаляем повторения
+train=df_without_miss.drop_duplicates()
+print(train.shape)
+
+# удаляем повторения
+test=dt_without_miss.drop_duplicates()
+print(test.shape)
+
+num_rows = len(train)
+low_information_cols = [] #
+
+for col in df.columns:
+    cnts = df[col].value_counts(dropna=False)
+    top_pct = (cnts/num_rows).iloc[0]
+    
+    if top_pct > 0.95:
+        low_information_cols.append(col)
+        print('{0}: {1:.5f}%'.format(col, top_pct*100))
+        print(cnts)
+        print()
+
+train['TotalSF'] = train['TotalBsmtSF'] + train['1stFlrSF'] + train['2ndFlrSF']
+test['TotalSF'] = test['TotalBsmtSF'] + test['1stFlrSF'] + test['2ndFlrSF']
+
+numeric_cols = train.select_dtypes(include = [np.number])
+corr = numeric_cols.corr()
+print ('The Most Correlated Features with SalePrice:'), print (corr['SalePrice'].sort_values(ascending = False)[:10], '\n')
+print ('The Most Uncorrelated Features with SalePrice:'), print (corr['SalePrice'].sort_values(ascending = False)[-5:])
+
+plt.scatter(x = train['GrLivArea'], y = train['SalePrice'])
+plt.ylabel('SalePrice')
+plt.xlabel('GrLivArea')
+
+plt.scatter(x = train['GarageArea'], y = train['SalePrice'])
+plt.ylabel('SalePrice')
+plt.xlabel('GarageArea')
+
+# remove GrLivArea outliers
+train = train[train['GrLivArea'] < 4500]
+
+# remove GarageArea outliers
+train = train[train['GarageArea'] < 1200]
+
+#корреляционная матрица
+corrmat = train.corr()
+f, ax = plt.subplots(figsize=(12, 12))
+sns.heatmap(corrmat,  square=True);
+
+#saleprice correlation matrix
+k = 12 #number of variables for heatmap
+cols = corrmat.nlargest(k, 'SalePrice')['SalePrice'].index
+cm = np.corrcoef(train[cols].values.T)
+sns.set(font_scale=1.25)
+hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
+plt.show()
+
+# encode categorical variables
+le = preprocessing.LabelEncoder()
+for name in train.columns:
+    if train[name].dtypes == 'O':
+        train[name] = train[name].astype(str)
+        le.fit(train[name])
+        train[name] = le.transform(train[name])
+
+# do the same for testset
+for name in test.columns:
+    if test[name].dtypes == 'O':
+        test[name] = test[name].astype(str)
+        le.fit(test[name])
+        test[name] = le.transform(test[name])
+
+# fill train missing values based on probability of occurrence
+for column in train.columns:
+    null_vals = train.isnull().values
+    a, b = np.unique(train.values[~null_vals], return_counts = 1)
+    train.loc[train[column].isna(), column] = np.random.choice(a, train[column].isnull().sum(), p = b / b.sum())
+
+#impute the test missing values probabilistically from a distribution
+for column in test.columns:
+    null_vals = test.isnull().values
+    a, b = np.unique(test.values[~null_vals], return_counts = 1)
+    test.loc[test[column].isna(), column] = np.random.choice(a, test[column].isnull().sum(), p = b / b.sum())
+
+# apply log transformation to reduce skewness over .75 by taking log(feature + 1)
+skewed_train = train.apply(lambda x: skew(x.dropna()))
+skewed_train = skewed_train[skewed_train > .75]
+train[skewed_train.index] = np.log1p(train[skewed_train.index])
+
+# deal with the skewness in the test data
+skewed_test = test.apply(lambda x: skew(x.dropna()))
+skewed_test = skewed_test[skewed_test > .75]
+test[skewed_test.index] = np.log1p(test[skewed_test.index])
+
+X = train.drop(['SalePrice', 'Id'], axis = 1)
+y = train['SalePrice']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
+
+lr = linear_model.LinearRegression()
+
+model = lr.fit(X_train, y_train)
+
+# make predictions based on model
+predictions = model.predict(X_test)
+
+print ('MAE is:', mean_absolute_error(y_test, predictions))
+print ('MSE is:', mean_squared_error(y_test, predictions))
+print ('RMSE is:', sqrt(mean_squared_error(y_test, predictions)))
+
+submission = pd.DataFrame()
+submission['Id'] = test['Id'].astype(int)
+
+temp = test.select_dtypes(include = [np.number]).drop(['Id'], axis = 1).interpolate()
+
+predictions = model.predict(temp)
+
+predictions = np.exp(predictions)
+submission['SalePrice'] = predictions
+
+
+submission.to_csv('submission000.csv', index = False)
