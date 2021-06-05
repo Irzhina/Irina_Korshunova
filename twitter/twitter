@@ -1,0 +1,113 @@
+
+import numpy as np
+import pandas as pd 
+from sklearn import feature_extraction, linear_model, model_selection, preprocessing
+
+
+
+df_train = pd.read_csv("C:/Users/Ира/Downloads/twitter/train.csv")
+df_test = pd.read_csv("C:/Users/Ира/Downloads/twitter/train.csv")
+df_train.head()
+
+df_train.info()
+
+df_train['keyword'].value_counts()[0:20]
+
+disaster_keywords = df_train.loc[df_train["target"] == 1]["keyword"].value_counts()[0:20]
+disaster_keywords
+
+nondisaster_keywords = df_train.loc[df_train["target"] == 0]["keyword"].value_counts()[0:20]
+nondisaster_keywords
+
+df_train['location'].value_counts()[0:20]
+
+disaster_locations = df_train.loc[df_train["target"] == 1]["location"].value_counts()[0:20]
+disaster_locations
+
+nondisaster_locations = df_train.loc[df_train["target"] == 0]["location"].value_counts()[0:20]
+nondisaster_locations
+
+def count_words(x):
+    return len(x.split())
+
+df_train['num_words'] = df_train['text'].apply(count_words)
+df_train
+
+df_train["target"].value_counts()
+
+# убираем ссылки
+def removeURL(text):
+    url = re.compile(r'https?://\S+|www\.\S+')
+    return url.sub(r'',text)
+
+# fубираем HTML
+def removeHTML(text):
+    html = re.compile(r'<.*?>')
+    return html.sub(r'',text)
+
+# удалить знакчки
+def removeEMOJI(text):
+    emoji_pattern = re.compile("["
+                           u"\U0001F600-\U0001F64F"  # emoticons
+                           u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                           u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                           u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                           u"\U00002702-\U000027B0"
+                           u"\U000024C2-\U0001F251"
+                           "]+", flags=re.UNICODE)
+    return emoji_pattern.sub(r'', text)
+
+#убираем пунктуацию
+def removePUNCT(text):
+    table = text.maketrans('','',string.punctuation)
+    return text.translate(table)
+
+#нижний регистр
+def removeCASE(text):
+    text = text.lower()
+    return text
+
+def remove_mention(text):
+    at=re.compile(r'@\S+')
+    return at.sub(r'USER',text)
+
+def remove_numbers(text):
+    numbers=re.compile(r'\d+')
+    return numbers.sub(r'',text)
+
+
+def clean (text):
+    text = removeURL(text)
+    text = removeHTML(text)
+    text = removeEMOJI(text)
+    text = removePUNCT(text)
+    text = removeCASE(text)
+    text = remove_numbers(text)
+    text = remove_mention(text)
+    return text
+
+df_train["clean_text"] = df_train["text"].apply(clean)
+df_test["clean_text"] = df_test["text"].apply(clean)
+
+df_train[['clean_text','text']].head(10)
+
+count_vectorizer = feature_extraction.text.CountVectorizer()
+train_vectors = count_vectorizer.fit_transform(df_train['clean_text'])
+test_vectors = count_vectorizer.transform(df_test['clean_text'])
+
+from sklearn.linear_model import LogisticRegression
+random_state = 29
+model = LogisticRegression(random_state=random_state)
+
+scores = model_selection.cross_val_score(model, train_vectors, df_train["target"], cv=3, scoring="f1")
+scores
+
+model.fit(train_vectors, df_train["target"])
+
+sample_submission = pd.read_csv("C:/Users/Ира/Downloads/twitter/sample_submission.csv")
+
+sample_submission['target'] = model.predict(test_vectors)
+
+sample_submission
+
+sample_submission.to_csv("submission.csv", index=False)
